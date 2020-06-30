@@ -1,15 +1,15 @@
 function Board() constructor {
 	
-	noOfColumns = 5;
+	noOfColumns = 6;
 	shad = 4;
 	headingHeight = 50;
-	seperatorWidth = 6;
+	seperatorWidth = 2;
 	boardMargin = 50;
-	cardMargin = 40;
-	cardGap = 15;
+	cardMargin = 25;
+	cardGap = 10;
 	columnWidth = (room_width - boardMargin - (seperatorWidth * (noOfColumns + 1))) / noOfColumns;
 	cardWidth = columnWidth - cardMargin;
-	cardHeight = columnWidth * 0.5;
+	cardHeight = columnWidth * 0.6;
 	x = boardMargin / 2;
 	y = boardMargin / 2;
 	
@@ -31,23 +31,45 @@ function Board() constructor {
 		columns[2] = ds_list_create();
 		columns[3] = ds_list_create();
 		columns[4] = ds_list_create();
+		columns[5] = ds_list_create();
 		
 		headers[0] = "Backlog";
-		colours[0] = make_color_rgb(240, 110, 110);
+		colours[0] = global.colours.red;
 		headers[1] = "Development";
-		colours[1] = make_color_rgb(240, 170, 110);
+		colours[1] = global.colours.orange;
 		headers[2] = "Testing";
-		colours[2] = make_color_rgb(240, 240, 110);
-		headers[3] = "Acceptance";	
-		colours[3] = make_color_rgb(110, 240, 110);
-		headers[4] = "Done!!";	
-		colours[4] = make_color_rgb(110, 240, 240);
+		colours[2] = global.colours.yellow;
+		headers[3] = "Release";	
+		colours[3] = global.colours.green;
+		headers[4] = "Acceptance";	
+		colours[4] = global.colours.blue;
+		headers[5] = "Done";	
+		colours[5] = global.colours.pink;
 		
-		ds_list_add(columns[4], new Card("one"));
-		ds_list_add(columns[2], new Card("two"));
-		ds_list_add(columns[1], new Card("three"));
-		ds_list_add(columns[0], new Card("four"));
-		ds_list_add(columns[0], new Card("five"));
+		ds_list_add(columns[Columns.DONE], new Card(Columns.DONE, "A", cardWidth, cardHeight, 5, 5, 4, 4, 2, 2, true, true, true, false));
+		ds_list_add(columns[Columns.RELEASE], new Card(Columns.RELEASE, "B", cardWidth, cardHeight, 5, 5, 4, 4, 2, 2, true, true, false, false));
+		ds_list_add(columns[Columns.RELEASE], new Card(Columns.RELEASE, "C", cardWidth, cardHeight, 5, 5, 4, 4, 2, 2, true, false, false, false));
+		ds_list_add(columns[Columns.RELEASE], new Card(Columns.RELEASE, "D", cardWidth, cardHeight, 5, 5, 4, 4, 2, 2, false, false, false, false));
+		ds_list_add(columns[Columns.TESTING], new Card(Columns.TESTING, "E", cardWidth, cardHeight, 4, 4, 3, 3, 1, 5, false, false, false, false));
+		ds_list_add(columns[Columns.DEVELOPMENT], new Card(Columns.DEVELOPMENT, "F", cardWidth, cardHeight, 5, 5, 2, 7, 0, 4, false, false, false, false));
+		ds_list_add(columns[Columns.DEVELOPMENT], new Card(Columns.DEVELOPMENT, "G", cardWidth, cardHeight, 5, 5, 7, 7, 0, 4, false, false, false, false));
+		ds_list_add(columns[Columns.DEVELOPMENT], new Card(Columns.DEVELOPMENT, "H", cardWidth, cardHeight, 5, 5, 6, 10, 0, 4, false, false, false, false));
+		ds_list_add(columns[Columns.BACKLOG], new Card(Columns.BACKLOG, "I", cardWidth, cardHeight, 3, 6, 0, 2, 0, 1, false, false, false, false));
+		ds_list_add(columns[Columns.BACKLOG], new Card(Columns.BACKLOG, "J", cardWidth, cardHeight, 0, 2, 0, 0, 0, 0, false, false, false, false));
+	}
+	
+	step = function() {
+		for(var c = 0; c < noOfColumns; c++) {
+			var list = columns[c];
+			for(var i = 0; i < ds_list_size(list); i++) {
+				var card = ds_list_find_value(list, i);
+				if (card.pointInside(mouse_x, mouse_y)) {
+					card.highlight = true;
+				} else {
+					card.highlight = false;
+				}
+			}
+		}
 	}
 	
 	draw = function(_gameHeight) {
@@ -67,20 +89,24 @@ function Board() constructor {
 	}
 	
 	drawHeaders = function() {
+		var tShad = 3;
+		var scale = 1.5;
 		draw_set_font(fntKenney);
 		draw_set_halign(fa_center);
 		draw_set_valign(fa_middle);
-		for (var i = 1; i <= 5; i++) {
+		for (var i = 1; i <= noOfColumns; i++) {
 			var coords = getHeadingCoords(i);
 			var colour = colours[i - 1];
 			coords[0] = coords[0] + (columnWidth / 2)
 			coords[1] = coords[1] + (headingHeight / 2);
-			draw_text_color(
-				coords[0] + 2, coords[1] + 2, headers[i - 1],
+			draw_text_transformed_color(
+				coords[0] + tShad, coords[1] + tShad, headers[i - 1],
+				scale, scale, 0,
 				c_black, c_black, c_black, c_black, 1
 			)
-			draw_text_color(
+			draw_text_transformed_color(
 				coords[0], coords[1], headers[i - 1],
+				scale, scale, 0,
 				colour, colour, colour, colour, 1
 			)
 		}
